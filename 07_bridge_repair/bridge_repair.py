@@ -8,14 +8,15 @@ begin = time.time()
 def evaluate(numbers: list, test_value: int, concat: bool) -> bool:
     *ns, tail = numbers
     if not ns:
-        return tail == test_value
-    new_test_values = [test_value - tail]
-    if test_value % tail == 0:
-        new_test_values.append(test_value // tail)
-    if concat and str(test_value).endswith(str(tail)):
-        unconcated = str(test_value).removesuffix(str(tail))
-        new_test_values.append(int(unconcated) if unconcated else 0)
-    return any(evaluate(ns, tv, concat) for tv in new_test_values)
+        return test_value == tail
+    if test_value > tail and evaluate(ns, test_value - tail, concat):
+        return True
+    if test_value % tail == 0 and evaluate(ns, test_value // tail, concat):
+        return True
+    tv_str, tail_str = str(test_value), str(tail)
+    if concat and len(tv_str) > len(tail_str) and tv_str.endswith(tail_str) and evaluate(ns, int(tv_str[: -len(tail_str)]), concat):
+        return True
+    return False
 
 
 with open("input.txt") as file:
