@@ -36,7 +36,7 @@ def test_obstruction(obs_pos: tuple, start_pos: tuple, lab: dict) -> bool:
 
 lab_map = {}
 starting_position = None
-with open("test_input.txt") as file:
+with open("input.txt") as file:
     for y, line in enumerate(file.readlines()):
         for x, char in enumerate(line):
             lab_map[(x, y)] = char
