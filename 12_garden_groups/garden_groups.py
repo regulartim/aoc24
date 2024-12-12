@@ -1,6 +1,5 @@
 import time
 from collections import namedtuple
-from functools import cache
 
 begin = time.time()
 
