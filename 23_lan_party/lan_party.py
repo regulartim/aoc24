@@ -16,15 +16,20 @@ def find_triplets(conns: dict) -> set:
     return result
 
 
-def bron_kerbosch(r, p, x, conns):
-    if not p and not x:
-        return r
-    cliques = []
-    for v in list(p):
-        cliques.append(bron_kerbosch(r | {v,}, p & conns[v], x & conns[v], conns))
-        p.remove(v)
-        x.add(v)
-    return max(cliques, key=len) if cliques else {}
+def bron_kerbosch(clique: set, remaining: set, skip: set, conns: dict):
+    if not remaining and not skip:
+        yield clique
+    else:
+        pivot = (remaining | skip).pop()
+        for node in remaining - conns[pivot]:
+            yield from bron_kerbosch(
+                clique | {node},
+                remaining & conns[node],
+                skip & conns[node],
+                conns,
+            )
+            remaining.remove(node)
+            skip.add(node)
 
 
 connections = defaultdict(set)
@@ -35,8 +40,9 @@ with open("input.txt") as file:
         connections[d].add(c)
 
 triplets_with_t = [t for t in find_triplets(connections) if any(c.startswith("t") for c in t)]
-maximum_clique = bron_kerbosch(set(),set(connections),set(), connections)
-password = ",".join(sorted(maximum_clique))
+cliques = bron_kerbosch(set(), set(connections), set(), connections)
+largest_clique = max(cliques, key=len)
+password = ",".join(sorted(largest_clique))
 
 print(f"Part 1: {len(triplets_with_t)}")
 print(f"Part 2: {password}")
