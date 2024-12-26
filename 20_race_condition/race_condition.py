@@ -1,6 +1,5 @@
 import time
-from collections import Counter, deque
-from itertools import combinations
+from collections import deque
 
 begin = time.time()
 
@@ -32,15 +31,28 @@ def build_dist_map(ref_point: tuple, track: set) -> dict:
     return result
 
 
+def candidates(distances: dict):
+    distances = sorted(distances.items(), key=lambda kvp: -kvp[1])
+    for p_idx, (p, p_dist) in enumerate(distances):
+        q_idx = p_idx + 1
+        while q_idx < len(distances):
+            q, q_dist = distances[q_idx]
+            cheat_length = abs(p[0] - q[0]) + abs(p[1] - q[1])
+            if cheat_length > 20:
+                q_idx += cheat_length - 20
+                continue
+            yield p_dist, q_dist, cheat_length
+            q_idx += 1
+
+
 def count_cheats(distances: dict, cutoff: int) -> int:
     counter = {2: 0, 20: 0}
-    for (p, p_dist), (q, q_dist) in combinations(distances.items(), 2):
-        dist_delta = abs(p[0] - q[0]) + abs(p[1] - q[1])
-        if abs(p_dist - q_dist) < dist_delta + cutoff:
+    for p_dist, q_dist, cheat_length in candidates(distances):
+        if p_dist - q_dist < cheat_length + cutoff:
             continue
-        if dist_delta <= 2:
+        if cheat_length <= 2:
             counter[2] += 1
-        if dist_delta <= 20:
+        if cheat_length <= 20:
             counter[20] += 1
     return counter
 
